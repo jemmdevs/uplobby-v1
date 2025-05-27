@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +11,10 @@ const CommentSection = ({ projectId, comments: initialComments = [] }) => {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editText, setEditText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const editInputRef = useRef(null);
 
   // Función para añadir un comentario
   const handleAddComment = async (e) => {
@@ -64,6 +68,105 @@ const CommentSection = ({ projectId, comments: initialComments = [] }) => {
     }
   };
 
+  // Función para iniciar la edición de un comentario
+  const handleEditStart = (comment) => {
+    setEditingCommentId(comment._id);
+    setEditText(comment.text);
+    // Enfocar el input de edición después de renderizar
+    setTimeout(() => {
+      if (editInputRef.current) {
+        editInputRef.current.focus();
+      }
+    }, 0);
+  };
+
+  // Función para cancelar la edición
+  const handleEditCancel = () => {
+    setEditingCommentId(null);
+    setEditText('');
+  };
+
+  // Función para guardar la edición de un comentario
+  const handleEditSave = async (commentId) => {
+    if (!editText.trim()) {
+      setError('El comentario no puede estar vacío');
+      return;
+    }
+    
+    if (editText.length > 500) {
+      setError('El comentario no puede tener más de 500 caracteres');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setError('');
+    
+    try {
+      const response = await fetch(`/api/projects/comment/${commentId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: editText,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al editar comentario');
+      }
+      
+      // Actualizar el comentario en la lista
+      setComments(comments.map(comment => 
+        comment._id === commentId 
+          ? { ...comment, text: editText, updatedAt: new Date() } 
+          : comment
+      ));
+      
+      // Salir del modo edición
+      setEditingCommentId(null);
+      setEditText('');
+      
+    } catch (error) {
+      console.error('Error al editar comentario:', error);
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Función para eliminar un comentario
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    
+    try {
+      const response = await fetch(`/api/projects/comment/${commentId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al eliminar comentario');
+      }
+      
+      // Eliminar el comentario de la lista
+      setComments(comments.filter(comment => comment._id !== commentId));
+      
+    } catch (error) {
+      console.error('Error al eliminar comentario:', error);
+      alert(error.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Formatear fecha
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -74,6 +177,11 @@ const CommentSection = ({ projectId, comments: initialComments = [] }) => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+  
+  // Verificar si el usuario es el autor del comentario
+  const isCommentAuthor = (comment) => {
+    return session && comment.author._id === session.user.id;
   };
 
   return (
@@ -186,13 +294,84 @@ const CommentSection = ({ projectId, comments: initialComments = [] }) => {
                       <h3 className="font-medium text-gray-900 dark:text-white">
                         {comment.author.name}
                       </h3>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatDate(comment.createdAt)}
-                      </span>
+                      <div className="flex items-center">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 mr-2">
+                          {formatDate(comment.createdAt)}
+                          {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
+                            <span className="ml-1 italic">(editado)</span>
+                          )}
+                        </span>
+                        
+                        {/* Botones de editar y eliminar para el autor del comentario */}
+                        {isCommentAuthor(comment) && (
+                          <div className="flex space-x-1">
+                            {editingCommentId !== comment._id && (
+                              <>
+                                <button
+                                  onClick={() => handleEditStart(comment)}
+                                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                  title="Editar comentario"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteComment(comment._id)}
+                                  className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                  title="Eliminar comentario"
+                                  disabled={isDeleting}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                      {comment.text}
-                    </p>
+                    
+                    {editingCommentId === comment._id ? (
+                      <div>
+                        <textarea
+                          ref={editInputRef}
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--mongodb-dark-green)] dark:bg-[var(--mongodb-navy)] dark:text-white resize-none mb-2"
+                          rows={3}
+                          maxLength={500}
+                        ></textarea>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {editText.length}/500 caracteres
+                          </span>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={handleEditCancel}
+                              className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-700 rounded-md transition-colors"
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              onClick={() => handleEditSave(comment._id)}
+                              disabled={isSubmitting}
+                              className="px-3 py-1 text-sm text-white bg-[var(--mongodb-dark-green)] hover:bg-[var(--mongodb-green)] rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSubmitting ? 'Guardando...' : 'Guardar'}
+                            </button>
+                          </div>
+                        </div>
+                        {error && (
+                          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                        {comment.text}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
