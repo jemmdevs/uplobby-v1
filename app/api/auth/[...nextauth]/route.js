@@ -87,6 +87,7 @@ export const authOptions = {
         
         if (userExists) {
           session.user.id = userExists._id.toString();
+          session.user.role = userExists.role || 'user';
         }
         
         return session;

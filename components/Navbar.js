@@ -31,6 +31,11 @@ const Navbar = () => {
                   Añadir Proyecto
                 </Link>
               )}
+              {session?.user?.role === 'admin' && (
+                <Link href="/admin" className="inline-flex items-center px-1 pt-1 border-b-2 border-[var(--mongodb-dark-green)] text-sm font-medium text-[var(--mongodb-dark-green)] hover:text-[var(--mongodb-green)] dark:text-[var(--mongodb-green)] dark:hover:text-white">
+                  Panel Admin
+                </Link>
+              )}
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -111,6 +116,11 @@ const Navbar = () => {
             {session && (
               <Link href="/projects/new" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-[var(--mongodb-green)] hover:text-gray-800 dark:text-gray-300 dark:hover:bg-[var(--mongodb-forest)] dark:hover:text-white">
                 Añadir Proyecto
+              </Link>
+            )}
+            {session?.user?.role === 'admin' && (
+              <Link href="/admin" className="block pl-3 pr-4 py-2 border-l-4 border-[var(--mongodb-dark-green)] text-base font-medium text-[var(--mongodb-dark-green)] hover:bg-gray-50 hover:border-[var(--mongodb-green)] hover:text-[var(--mongodb-green)] dark:text-[var(--mongodb-green)] dark:hover:bg-[var(--mongodb-forest)] dark:hover:text-white">
+                Panel Admin
               </Link>
             )}
           </div>
