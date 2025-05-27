@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import connectToDatabase from '@/lib/mongodb';
+import { connectToDB } from '@/lib/mongodb';
 import User from '@/models/User';
 
 export const authOptions = {
@@ -27,7 +27,7 @@ export const authOptions = {
         }
         
         try {
-          await connectToDatabase();
+          await connectToDB();
           
           // Buscar usuario por email
           const user = await User.findOne({ email: credentials.email });
@@ -60,7 +60,7 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
-        await connectToDatabase();
+        await connectToDB();
         
         // Check if user exists
         const userExists = await User.findOne({ email: user.email });
@@ -82,7 +82,7 @@ export const authOptions = {
     },
     async session({ session }) {
       try {
-        await connectToDatabase();
+        await connectToDB();
         const userExists = await User.findOne({ email: session.user.email });
         
         if (userExists) {

@@ -1,29 +1,51 @@
 import mongoose from 'mongoose';
 
+const CommentSchema = new mongoose.Schema({
+  text: {
+    type: String,
+    required: [true, 'El comentario no puede estar vacío'],
+    maxlength: [500, 'El comentario no puede tener más de 500 caracteres'],
+  },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const ProjectSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, 'Please provide a title'],
-    maxlength: [100, 'Title cannot be more than 100 characters'],
+    required: [true, 'Por favor proporciona un título'],
+    maxlength: [100, 'El título no puede tener más de 100 caracteres'],
   },
   description: {
     type: String,
-    required: [true, 'Please provide a description'],
-    maxlength: [1000, 'Description cannot be more than 1000 characters'],
+    required: [true, 'Por favor proporciona una descripción'],
+    maxlength: [1000, 'La descripción no puede tener más de 1000 caracteres'],
   },
   image: {
     type: String,
-    required: [true, 'Please provide an image'],
+    required: [true, 'Por favor proporciona una imagen'],
   },
   link: {
     type: String,
-    required: [true, 'Please provide a link to the project'],
+    required: [true, 'Por favor proporciona un enlace al proyecto'],
   },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  comments: [CommentSchema],
   createdAt: {
     type: Date,
     default: Date.now,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectToDatabase from '@/lib/mongodb';
+import { connectToDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
@@ -7,19 +7,37 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 // GET a single project
 export async function GET(request, { params }) {
   try {
-    await connectToDatabase();
+    const session = await getServerSession(authOptions);
+    await connectToDB();
     
     const { id } = params;
-    const project = await Project.findById(id).populate('creator', 'name email image');
+    const project = await Project.findById(id)
+      .populate('creator', 'name email image')
+      .populate({
+        path: 'comments.author',
+        select: 'name image'
+      });
     
     if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
     
-    return NextResponse.json(project, { status: 200 });
+    // Convertir a objeto para poder añadir propiedades
+    const projectObj = project.toObject();
+    
+    // Añadir campo userLiked si hay sesión
+    if (session) {
+      projectObj.userLiked = project.likes.some(
+        (likeId) => likeId.toString() === session.user.id
+      );
+    } else {
+      projectObj.userLiked = false;
+    }
+    
+    return NextResponse.json(projectObj, { status: 200 });
   } catch (error) {
-    console.error('Error fetching project:', error);
-    return NextResponse.json({ error: 'Failed to fetch project' }, { status: 500 });
+    console.error('Error al obtener proyecto:', error);
+    return NextResponse.json({ error: 'Error al obtener proyecto' }, { status: 500 });
   }
 }
 
@@ -29,29 +47,29 @@ export async function DELETE(request, { params }) {
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     
-    await connectToDatabase();
+    await connectToDB();
     
     const { id } = params;
     const project = await Project.findById(id);
     
     if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
     
-    // Check if the user is the creator of the project
+    // Verificar si el usuario es el creador del proyecto
     if (project.creator.toString() !== session.user.id) {
-      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
     
     await Project.findByIdAndDelete(id);
     
-    return NextResponse.json({ message: 'Project deleted successfully' }, { status: 200 });
+    return NextResponse.json({ message: 'Proyecto eliminado correctamente' }, { status: 200 });
   } catch (error) {
-    console.error('Error deleting project:', error);
-    return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
+    console.error('Error al eliminar proyecto:', error);
+    return NextResponse.json({ error: 'Error al eliminar proyecto' }, { status: 500 });
   }
 }
 
@@ -61,10 +79,10 @@ export async function PATCH(request, { params }) {
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     
-    await connectToDatabase();
+    await connectToDB();
     
     const { id } = params;
     const { title, description, image, link } = await request.json();
@@ -72,23 +90,32 @@ export async function PATCH(request, { params }) {
     const project = await Project.findById(id);
     
     if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
     
-    // Check if the user is the creator of the project
+    // Verificar si el usuario es el creador del proyecto
     if (project.creator.toString() !== session.user.id) {
-      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
     
+    // Actualizar el proyecto manteniendo los likes y comentarios
     const updatedProject = await Project.findByIdAndUpdate(
       id,
       { title, description, image, link },
       { new: true, runValidators: true }
+    ).populate('creator', 'name email image');
+    
+    // Convertir a objeto para poder añadir propiedades
+    const projectObj = updatedProject.toObject();
+    
+    // Añadir campo userLiked
+    projectObj.userLiked = updatedProject.likes.some(
+      (likeId) => likeId.toString() === session.user.id
     );
     
-    return NextResponse.json(updatedProject, { status: 200 });
+    return NextResponse.json(projectObj, { status: 200 });
   } catch (error) {
-    console.error('Error updating project:', error);
-    return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
+    console.error('Error al actualizar proyecto:', error);
+    return NextResponse.json({ error: 'Error al actualizar proyecto' }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -7,71 +8,178 @@ import { useSession } from 'next-auth/react';
 const ProjectCard = ({ project, onDelete }) => {
   const { data: session } = useSession();
   const isOwner = session?.user?.id === project.creator._id;
+  const [liked, setLiked] = useState(project.userLiked || false);
+  const [likesCount, setLikesCount] = useState(project.likes?.length || 0);
+  const [isLiking, setIsLiking] = useState(false);
+  const createdAt = new Date(project.createdAt || Date.now()).toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+  
+  // Función para manejar los likes
+  const handleLike = async () => {
+    if (!session) {
+      alert('Debes iniciar sesión para dar like a un proyecto');
+      return;
+    }
+    
+    if (isLiking) return; // Evitar múltiples clics rápidos
+    
+    try {
+      setIsLiking(true);
+      
+      // Optimistic UI update
+      setLiked(!liked);
+      setLikesCount(liked ? likesCount - 1 : likesCount + 1);
+      
+      const response = await fetch('/api/projects/like', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projectId: project._id }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Revertir cambios si hay error
+        setLiked(liked);
+        setLikesCount(liked ? likesCount : likesCount - 1);
+        throw new Error(data.error || 'Error al procesar like');
+      }
+      
+      // Actualizar estado con la respuesta del servidor
+      setLiked(data.liked);
+      setLikesCount(data.likesCount);
+      
+    } catch (error) {
+      console.error('Error al dar like:', error);
+      alert(error.message);
+    } finally {
+      setIsLiking(false);
+    }
+  };
 
   return (
-    <div className="card bg-white dark:bg-[var(--mongodb-navy)] shadow-lg rounded-lg overflow-hidden">
-      <div className="relative h-48 w-full">
+    <div className="card bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300 hover:shadow-lg">
+      {/* Cabecera del post con información del creador */}
+      <div className="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
+        <div className="flex-shrink-0">
+          {project.creator.image ? (
+            <Image
+              className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+              src={project.creator.image}
+              alt={project.creator.name}
+              width={40}
+              height={40}
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white text-lg font-medium shadow-sm">
+              {project.creator.name?.charAt(0) || "U"}
+            </div>
+          )}
+        </div>
+        <div className="ml-3 flex-1">
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
+            {project.creator.name}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {createdAt}
+          </p>
+        </div>
+        {isOwner && (
+          <div className="flex space-x-1">
+            <Link
+              href={`/projects/edit/${project._id}`}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Editar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </Link>
+            <button
+              onClick={() => onDelete(project._id)}
+              className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Eliminar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+      
+      {/* Título del proyecto */}
+      <div className="px-4 pt-3 pb-2">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.title}</h3>
+      </div>
+      
+      {/* Imagen del proyecto */}
+      <div className="relative aspect-video w-full">
         <Image
           src={project.image}
           alt={project.title}
           fill
           style={{ objectFit: 'cover' }}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="transition-transform duration-500 hover:scale-105"
         />
       </div>
-      <div className="p-5">
-        <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">{project.title}</h3>
-        <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">{project.description}</p>
+      
+      {/* Descripción y acciones */}
+      <div className="p-4">
+        <p className="text-gray-700 dark:text-gray-300 mb-4">{project.description}</p>
         
-        <div className="flex items-center mb-4">
-          <div className="flex-shrink-0">
-            {project.creator.image ? (
-              <Image
-                className="h-8 w-8 rounded-full"
-                src={project.creator.image}
-                alt={project.creator.name}
-                width={32}
-                height={32}
-              />
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white">
-                {project.creator.name?.charAt(0) || "U"}
-              </div>
-            )}
+        {/* Acciones del post */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={handleLike}
+              disabled={isLiking}
+              className={`flex items-center ${liked ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'} hover:text-red-500 dark:hover:text-red-400 transition-colors`}
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-6 w-6 mr-1" 
+                fill={liked ? 'currentColor' : 'none'} 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={liked ? 1 : 2} 
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+                />
+              </svg>
+              <span className="text-sm">{likesCount} {likesCount === 1 ? 'Me gusta' : 'Me gusta'}</span>
+            </button>
+            <button 
+              onClick={() => window.location.href = `/projects/${project._id}#comments`}
+              className="flex items-center text-gray-500 dark:text-gray-400 hover:text-[var(--mongodb-dark-green)] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span className="text-sm">{project.comments?.length || 0} {(project.comments?.length || 0) === 1 ? 'Comentario' : 'Comentarios'}</span>
+            </button>
           </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {project.creator.name}
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex justify-between items-center">
+          
           <a
             href={project.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary px-4 py-2 rounded-md text-sm inline-block"
+            className="flex items-center text-[var(--mongodb-dark-green)] hover:text-[var(--mongodb-green)] transition-colors"
           >
-            Ver Proyecto
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            <span className="text-sm font-medium">Ver Proyecto</span>
           </a>
-          
-          {isOwner && (
-            <div className="flex space-x-2">
-              <Link
-                href={`/projects/edit/${project._id}`}
-                className="btn-secondary px-3 py-1 rounded-md text-sm"
-              >
-                Editar
-              </Link>
-              <button
-                onClick={() => onDelete(project._id)}
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
-              >
-                Eliminar
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
