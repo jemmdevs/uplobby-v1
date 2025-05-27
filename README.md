@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# UpLobby - Project Repository
+
+UpLobby is a platform for developers to showcase their projects. Built with Next.js 15, MongoDB, and Cloudinary, it allows users to register with NextAuth and upload their projects with images, titles, descriptions, and links.
+
+## Features
+
+- User authentication with NextAuth (Google, GitHub, and credentials)
+- Project creation, editing, and deletion
+- Image upload with Cloudinary
+- MongoDB database integration
+- Responsive design with MongoDB-inspired color scheme
+
+## Technologies Used
+
+- Next.js 15 (App Router)
+- MongoDB for database
+- Cloudinary for image storage
+- NextAuth for authentication
+- Tailwind CSS for styling
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18.17.0 or later
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/uplobby.git
+cd uplobby
+```
+
+2. Install dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The project uses the following environment variables which are set in the `next.config.mjs` file:
 
-## Learn More
+- `MONGODB_URI`: MongoDB connection string
+- `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name
+- `CLOUDINARY_API_KEY`: Cloudinary API key
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret
+- `NEXTAUTH_SECRET`: Secret for NextAuth
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `/app`: Contains the Next.js application routes and pages
+- `/components`: Reusable React components
+- `/lib`: Utility functions and configurations
+- `/models`: MongoDB schema models
+- `/public`: Static assets
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Routes
 
-## Deploy on Vercel
+- `/api/auth/[...nextauth]`: NextAuth authentication endpoints
+- `/api/projects`: Project CRUD operations
+- `/api/upload`: Cloudinary image upload endpoint
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License.

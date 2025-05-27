@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#F9FBFA" />
+  
+  <!-- MongoDB Leaf Logo -->
+  <g transform="translate(350, 250) scale(2.5)">
+    <path d="M42.4,0C42.4,0,18.2,16.3,16.5,44.2c-1.5,23.4,14.8,37.6,16.9,41c1.3,2.2,2.7,6.1,2.7,6.1
+      l4.3-2.9c0,0-2-3.5-2.4-5.2c-0.4-1.7-1.5-7-1.5-7s-7.3-7.4-8.6-13.9c-1.3-6.5,1.1-20.4,7.8-30.2c6.7-9.8,15.9-14.6,15.9-14.6" 
+      fill="#13AA52" />
+  </g>
+  
+  <!-- Project Cards -->
+  <g transform="translate(100, 150)">
+    <!-- Card 1 -->
+    <rect x="0" y="0" width="150" height="200" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="2" />
+    <rect x="10" y="10" width="130" height="100" rx="5" fill="#00ED64" />
+    <rect x="20" y="120" width="110" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="20" y="140" width="80" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="20" y="160" width="60" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="20" y="180" width="40" height="10" rx="2" fill="#13AA52" />
+    
+    <!-- Card 2 -->
+    <rect x="170" y="0" width="150" height="200" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="2" />
+    <rect x="180" y="10" width="130" height="100" rx="5" fill="#023430" />
+    <rect x="190" y="120" width="110" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="190" y="140" width="80" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="190" y="160" width="60" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="190" y="180" width="40" height="10" rx="2" fill="#13AA52" />
+    
+    <!-- Card 3 -->
+    <rect x="340" y="0" width="150" height="200" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="2" />
+    <rect x="350" y="10" width="130" height="100" rx="5" fill="#00684A" />
+    <rect x="360" y="120" width="110" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="360" y="140" width="80" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="360" y="160" width="60" height="10" rx="2" fill="#E5E7EB" />
+    <rect x="360" y="180" width="40" height="10" rx="2" fill="#13AA52" />
+  </g>
+  
+  <!-- Decorative Elements -->
+  <circle cx="700" cy="100" r="40" fill="#00ED64" opacity="0.3" />
+  <circle cx="650" cy="150" r="25" fill="#13AA52" opacity="0.4" />
+  <circle cx="720" cy="170" r="15" fill="#023430" opacity="0.5" />
+  
+  <circle cx="100" cy="500" r="30" fill="#00ED64" opacity="0.3" />
+  <circle cx="150" cy="470" r="20" fill="#13AA52" opacity="0.4" />
+  <circle cx="80" cy="450" r="10" fill="#023430" opacity="0.5" />
+</svg>
