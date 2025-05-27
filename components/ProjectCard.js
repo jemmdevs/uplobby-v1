@@ -7,7 +7,9 @@ import { useSession } from 'next-auth/react';
 
 const ProjectCard = ({ project, onDelete }) => {
   const { data: session } = useSession();
-  const isOwner = session?.user?.id === project.creator._id;
+  // Verificar si el creador existe antes de acceder a sus propiedades
+  const creatorExists = project.creator && typeof project.creator === 'object';
+  const isOwner = session?.user?.id === (creatorExists ? project.creator._id : null);
   const [liked, setLiked] = useState(project.userLiked || false);
   const [likesCount, setLikesCount] = useState(project.likes?.length || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -67,23 +69,31 @@ const ProjectCard = ({ project, onDelete }) => {
       {/* Cabecera del post con información del creador */}
       <div className="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
         <div className="flex-shrink-0">
-          {project.creator.image ? (
-            <Image
-              className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
-              src={project.creator.image}
-              alt={project.creator.name}
-              width={40}
-              height={40}
-            />
+          {creatorExists ? (
+            project.creator.image ? (
+              <Image
+                className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+                src={project.creator.image}
+                alt={project.creator.name}
+                width={40}
+                height={40}
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white text-lg font-medium shadow-sm">
+                {project.creator.name?.charAt(0) || "U"}
+              </div>
+            )
           ) : (
-            <div className="h-10 w-10 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white text-lg font-medium shadow-sm">
-              {project.creator.name?.charAt(0) || "U"}
+            <div className="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center text-white text-lg font-medium shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
             </div>
           )}
         </div>
         <div className="ml-3 flex-1">
           <p className="text-sm font-medium text-gray-900 dark:text-white">
-            {project.creator.name}
+            {creatorExists ? project.creator.name : "Usuario eliminado"}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {createdAt}
