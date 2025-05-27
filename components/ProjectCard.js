@@ -53,7 +53,7 @@ const ProjectCard = ({ project, onDelete }) => {
             rel="noopener noreferrer"
             className="btn-primary px-4 py-2 rounded-md text-sm inline-block"
           >
-            View Project
+            Ver Proyecto
           </a>
           
           {isOwner && (
@@ -62,13 +62,13 @@ const ProjectCard = ({ project, onDelete }) => {
                 href={`/projects/edit/${project._id}`}
                 className="btn-secondary px-3 py-1 rounded-md text-sm"
               >
-                Edit
+                Editar
               </Link>
               <button
                 onClick={() => onDelete(project._id)}
                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
               >
-                Delete
+                Eliminar
               </button>
             </div>
           )}

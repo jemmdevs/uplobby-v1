@@ -10,17 +10,17 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="md:w-1/2 space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-                Showcase Your Projects with <span className="text-[var(--mongodb-dark-green)]">UpLobby</span>
+                Muestra tus Proyectos con <span className="text-[var(--mongodb-dark-green)]">UpLobby</span>
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-300">
-                A platform for developers to share and discover amazing projects. Upload your work, get feedback, and connect with other creators.
+                Una plataforma para que los desarrolladores compartan y descubran proyectos increíbles. Sube tu trabajo, recibe feedback y conéctate con otros creadores.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/projects" className="btn-primary px-6 py-3 rounded-md text-base font-medium inline-flex items-center justify-center">
-                  Browse Projects
+                  Explorar Proyectos
                 </Link>
                 <Link href="/projects/new" className="btn-secondary px-6 py-3 rounded-md text-base font-medium inline-flex items-center justify-center">
-                  Add Your Project
+                  Añadir Proyecto
                 </Link>
               </div>
             </div>
@@ -43,9 +43,9 @@ export default function Home() {
       <section className="py-16 bg-white dark:bg-[var(--mongodb-navy)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Why Use UpLobby?</h2>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">¿Por qué usar UpLobby?</h2>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              The perfect platform to showcase your work and connect with others
+              La plataforma perfecta para mostrar tu trabajo y conectar con otros desarrolladores
             </p>
           </div>
 
@@ -56,9 +56,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Showcase Your Work</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Muestra tu Trabajo</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Upload your projects with images, descriptions, and links to let the world see what you&apos;ve built.
+                Sube tus proyectos con imágenes, descripciones y enlaces para que el mundo vea lo que has creado.
               </p>
             </div>
 
@@ -68,9 +68,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Connect with Others</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Conéctate con Otros</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Discover projects from other developers and build your network in the tech community.
+                Descubre proyectos de otros desarrolladores y construye tu red en la comunidad tecnológica.
               </p>
             </div>
 
@@ -80,9 +80,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Secure Authentication</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Autenticación Segura</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Sign in securely with NextAuth to manage your projects and profile with ease.
+                Inicia sesión de forma segura para gestionar tus proyectos y perfil con facilidad.
               </p>
             </div>
           </div>
@@ -92,12 +92,12 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-16 bg-[var(--mongodb-dark-green)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Ready to showcase your projects?</h2>
+          <h2 className="text-3xl font-bold text-white mb-6">¿Listo para mostrar tus proyectos?</h2>
           <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
-            Join our community of developers and start sharing your work today.
+            Únete a nuestra comunidad de desarrolladores y comienza a compartir tu trabajo hoy mismo.
           </p>
           <Link href="/projects/new" className="bg-white text-[var(--mongodb-dark-green)] hover:bg-gray-100 px-8 py-3 rounded-md text-base font-medium inline-flex items-center justify-center transition-colors">
-            Get Started Now
+            Comenzar Ahora
           </Link>
         </div>
       </section>
