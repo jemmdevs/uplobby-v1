@@ -58,7 +58,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Showcase Your Work</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Upload your projects with images, descriptions, and links to let the world see what you've built.
+                Upload your projects with images, descriptions, and links to let the world see what you&apos;ve built.
               </p>
             </div>
 
