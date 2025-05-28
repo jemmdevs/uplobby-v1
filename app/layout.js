@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import MobileNavbar from "@/components/MobileNavbar";
 import Providers from "@/components/Providers";
 
 const geistSans = Geist({
@@ -27,7 +28,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <div className="min-h-screen flex flex-col">
             <Navbar />
-            <main className="flex-grow">
+            <main className="flex-grow pb-16 md:pb-0"> {/* Añadimos padding-bottom para evitar que el contenido quede detrás de la barra móvil */}
               {children}
             </main>
             <footer className="bg-white dark:bg-[var(--mongodb-navy)] py-6 border-t border-gray-200 dark:border-gray-800">
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
                 </p>
               </div>
             </footer>
+            <MobileNavbar /> {/* Barra de navegación móvil */}
           </div>
         </Providers>
       </body>

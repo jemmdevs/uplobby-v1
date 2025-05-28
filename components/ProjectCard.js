@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
-const ProjectCard = ({ project, onDelete, compact = false }) => {
+const ProjectCard = ({ project, onDelete, compact = false, className = '' }) => {
   const { data: session } = useSession();
   // Verificar si el creador existe antes de acceder a sus propiedades
   const creatorExists = project.creator && typeof project.creator === 'object';
@@ -65,7 +65,7 @@ const ProjectCard = ({ project, onDelete, compact = false }) => {
   };
 
   return (
-    <div className={`card bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300 hover:shadow-lg ${compact ? 'h-full flex flex-col' : ''}`}>
+    <div className={`card bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300 hover:shadow-lg ${compact ? 'h-full flex flex-col' : ''} ${className}`}>
       {/* Cabecera del post con información del creador */}
       <div className="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
         <div className="flex-shrink-0">

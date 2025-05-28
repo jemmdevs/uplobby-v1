@@ -14,6 +14,7 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('projects'); // 'projects' o 'users'
   const [sortBy, setSortBy] = useState('date'); // 'date' o 'likes'
+  const [viewMode, setViewMode] = useState('list'); // 'list' o 'grid'
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -27,6 +28,22 @@ export default function ProjectsPage() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const searchRef = useRef(null);
+  
+  // Guardar la preferencia de vista en localStorage
+  useEffect(() => {
+    // Recuperar la preferencia guardada al cargar la página
+    const savedViewMode = localStorage.getItem('projectsViewMode');
+    if (savedViewMode) {
+      setViewMode(savedViewMode);
+    }
+  }, []);
+  
+  // Función para cambiar el modo de visualización
+  const toggleViewMode = () => {
+    const newViewMode = viewMode === 'list' ? 'grid' : 'list';
+    setViewMode(newViewMode);
+    localStorage.setItem('projectsViewMode', newViewMode);
+  };
 
   // Manejar clics fuera del área de búsqueda para cerrar los resultados
   useEffect(() => {
@@ -359,8 +376,35 @@ export default function ProjectsPage() {
           </form>
         </div>
         
-        {/* Controles de ordenación */}
-        <div className="flex justify-end mb-4">
+        {/* Controles de ordenación y visualización */}
+        <div className="flex justify-between items-center mb-4">
+          {/* Botón para cambiar el modo de visualización */}
+          <div className="bg-white dark:bg-[var(--mongodb-navy)] rounded-xl shadow-md p-2 border border-gray-100 dark:border-gray-800 inline-flex items-center">
+            <button
+              type="button"
+              onClick={toggleViewMode}
+              className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+              aria-label="Cambiar modo de visualización"
+            >
+              {viewMode === 'list' ? (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                  <span>Vista de lista</span>
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                  <span>Vista de cuadrícula</span>
+                </>
+              )}
+            </button>
+          </div>
+          
+          {/* Controles de ordenación */}
           <div className="bg-white dark:bg-[var(--mongodb-navy)] rounded-xl shadow-md p-2 border border-gray-100 dark:border-gray-800 inline-flex items-center">
             <span className="text-sm text-gray-700 dark:text-gray-300 mr-2 font-medium">Ordenar por:</span>
             <div className="flex rounded-md shadow-sm">
@@ -418,6 +462,7 @@ export default function ProjectsPage() {
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                 <div className="space-y-2">
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
                 </div>
               </div>
             </div>
@@ -429,46 +474,34 @@ export default function ProjectsPage() {
               <div className="p-4 space-y-4">
                 <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6">
-            <div className="animate-pulse">
-              <div className="h-48 bg-gray-200 dark:bg-gray-700 w-full"></div>
-              <div className="p-4 space-y-4">
-                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
               </div>
             </div>
           </div>
         </div>
       ) : error ? (
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-red-100 dark:border-red-900/30 p-6 mb-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 p-8 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="bg-red-100 dark:bg-red-900/20 rounded-full p-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Ha ocurrido un error</h3>
-                <p className="mt-2 text-red-700 dark:text-red-400">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()} 
-                  className="mt-4 inline-flex items-center text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Intentar de nuevo
-                </button>
-              </div>
             </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Error al cargar los proyectos</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+              {error}
+            </p>
+            <button 
+              onClick={() => fetchProjects(1)}
+              className="inline-flex items-center justify-center text-white bg-[var(--mongodb-dark-green)] hover:bg-[var(--mongodb-green)] px-6 py-3 rounded-full text-base font-medium transition-colors shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reintentar
+            </button>
           </div>
         </div>
       ) : projects.length === 0 ? (
@@ -533,14 +566,17 @@ export default function ProjectsPage() {
           </div>
         </div>
       ) : (
-        <div className="max-w-2xl mx-auto">
-          {projects.map((project) => (
-            <ProjectCard 
-              key={project._id} 
-              project={project} 
-              onDelete={handleDeleteProject}
-            />
-          ))}
+        <div className={`max-w-2xl mx-auto ${viewMode === 'grid' ? 'md:max-w-6xl' : ''}`}>
+          <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}`}>
+            {projects.map((project) => (
+              <ProjectCard 
+                key={project._id} 
+                project={project} 
+                onDelete={handleDeleteProject}
+                className={viewMode === 'grid' ? 'h-full' : ''}
+              />
+            ))}
+          </div>
           
           {/* Controles de paginación */}
           {pagination.totalPages > 1 && (
