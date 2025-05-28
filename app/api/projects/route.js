@@ -11,6 +11,11 @@ export async function GET(request) {
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId');
     
+    // Parámetros de paginación
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '10');
+    const skip = (page - 1) * limit;
+    
     await connectToDB();
     
     let query = {};
@@ -20,13 +25,19 @@ export async function GET(request) {
       query.creator = userId;
     }
     
+    // Obtener el total de proyectos para la paginación
+    const totalProjects = await Project.countDocuments(query);
+    
+    // Obtener los proyectos para la página actual
     const projects = await Project.find(query)
       .populate('creator', 'name email image')
       .populate({
         path: 'comments.author',
         select: 'name image'
       })
-      .sort({ createdAt: -1 }); // Ordenar por fecha de creación (más recientes primero)
+      .sort({ createdAt: -1 }) // Ordenar por fecha de creación (más recientes primero)
+      .skip(skip)
+      .limit(limit);
     
     // Si hay sesión, añadir campo userLiked a cada proyecto
     const projectsWithUserLiked = projects.map(project => {
@@ -41,7 +52,22 @@ export async function GET(request) {
       return projectObj;
     });
     
-    return NextResponse.json(projectsWithUserLiked, { status: 200 });
+    // Calcular información de paginación
+    const totalPages = Math.ceil(totalProjects / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+    
+    return NextResponse.json({
+      projects: projectsWithUserLiked,
+      pagination: {
+        totalProjects,
+        totalPages,
+        currentPage: page,
+        limit,
+        hasNextPage,
+        hasPrevPage
+      }
+    }, { status: 200 });
   } catch (error) {
     console.error('Error al obtener proyectos:', error);
     return NextResponse.json({ error: 'Error al obtener proyectos' }, { status: 500 });
