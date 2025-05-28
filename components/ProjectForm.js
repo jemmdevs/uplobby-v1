@@ -125,7 +125,7 @@ const ProjectForm = ({ type, project }) => {
             value={formData.title}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--mongodb-dark-green)] focus:ring-[var(--mongodb-dark-green)] dark:bg-[var(--mongodb-navy)] dark:border-gray-700 dark:text-white px-4 py-3 transition duration-150 ease-in-out"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--mongodb-dark-green)] focus:ring-[var(--mongodb-dark-green)] bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-white px-4 py-3 transition duration-150 ease-in-out"
             placeholder="Escribe el título de tu proyecto"
           />
         </div>
@@ -141,7 +141,7 @@ const ProjectForm = ({ type, project }) => {
             value={formData.link}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--mongodb-dark-green)] focus:ring-[var(--mongodb-dark-green)] dark:bg-[var(--mongodb-navy)] dark:border-gray-700 dark:text-white px-4 py-3 transition duration-150 ease-in-out"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--mongodb-dark-green)] focus:ring-[var(--mongodb-dark-green)] bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-white px-4 py-3 transition duration-150 ease-in-out"
             placeholder="https://ejemplo.com"
           />
         </div>
@@ -157,7 +157,7 @@ const ProjectForm = ({ type, project }) => {
             onChange={handleChange}
             required
             rows={5}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--mongodb-dark-green)] focus:ring-[var(--mongodb-dark-green)] dark:bg-[var(--mongodb-navy)] dark:border-gray-700 dark:text-white px-4 py-3 transition duration-150 ease-in-out"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--mongodb-dark-green)] focus:ring-[var(--mongodb-dark-green)] bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-white px-4 py-3 transition duration-150 ease-in-out"
             placeholder="Describe tu proyecto en detalle"
           />
         </div>

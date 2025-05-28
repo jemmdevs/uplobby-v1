@@ -65,7 +65,7 @@ const ProjectCard = ({ project, onDelete, compact = false, className = '' }) => 
   };
 
   return (
-    <div className={`card bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300 hover:shadow-lg ${compact ? 'h-full flex flex-col' : ''} ${className}`}>
+    <div className={`card bg-white dark:bg-gray-900 shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300 hover:shadow-lg ${compact ? 'h-full flex flex-col' : ''} ${className}`}>
       {/* Cabecera del post con información del creador */}
       <div className="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
         <div className="flex-shrink-0">
@@ -199,10 +199,10 @@ const ProjectCard = ({ project, onDelete, compact = false, className = '' }) => 
             href={`/projects/${project._id}`}
             className="flex items-center text-[var(--mongodb-dark-green)] hover:text-[var(--mongodb-green)] transition-colors"
           >
-            <span className="text-sm font-medium">Ver</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
+            <span className="text-sm font-medium">Ver proyecto</span>
           </Link>
         </div>
       </div>
