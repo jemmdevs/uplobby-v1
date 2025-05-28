@@ -23,6 +23,18 @@ const UserSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  bio: {
+    type: String,
+    maxlength: [500, 'La biografía no puede tener más de 500 caracteres'],
+  },
+  phone: {
+    type: String,
+    maxlength: [20, 'El número de teléfono no puede tener más de 20 caracteres'],
+  },
+  github: {
+    type: String,
+    maxlength: [100, 'El nombre de usuario de GitHub no puede tener más de 100 caracteres'],
+  },
   createdAt: {
     type: Date,
     default: Date.now,

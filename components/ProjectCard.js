@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
-const ProjectCard = ({ project, onDelete }) => {
+const ProjectCard = ({ project, onDelete, compact = false }) => {
   const { data: session } = useSession();
   // Verificar si el creador existe antes de acceder a sus propiedades
   const creatorExists = project.creator && typeof project.creator === 'object';
@@ -65,24 +65,26 @@ const ProjectCard = ({ project, onDelete }) => {
   };
 
   return (
-    <div className="card bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300 hover:shadow-lg">
+    <div className={`card bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300 hover:shadow-lg ${compact ? 'h-full flex flex-col' : ''}`}>
       {/* Cabecera del post con información del creador */}
       <div className="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
         <div className="flex-shrink-0">
           {creatorExists ? (
-            project.creator.image ? (
-              <Image
-                className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
-                src={project.creator.image}
-                alt={project.creator.name}
-                width={40}
-                height={40}
-              />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white text-lg font-medium shadow-sm">
-                {project.creator.name?.charAt(0) || "U"}
-              </div>
-            )
+            <Link href={`/profile/${project.creator._id}`} className="block">
+              {project.creator.image ? (
+                <Image
+                  className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800 shadow-sm hover:border-[var(--mongodb-green)] transition-all"
+                  src={project.creator.image}
+                  alt={project.creator.name}
+                  width={40}
+                  height={40}
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white text-lg font-medium shadow-sm hover:bg-[var(--mongodb-green)] transition-all">
+                  {project.creator.name?.charAt(0) || "U"}
+                </div>
+              )}
+            </Link>
           ) : (
             <div className="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center text-white text-lg font-medium shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,9 +94,17 @@ const ProjectCard = ({ project, onDelete }) => {
           )}
         </div>
         <div className="ml-3 flex-1">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
-            {creatorExists ? project.creator.name : "Usuario eliminado"}
-          </p>
+          {creatorExists ? (
+            <Link href={`/profile/${project.creator._id}`} className="hover:text-[var(--mongodb-green)] transition-colors">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {project.creator.name}
+              </p>
+            </Link>
+          ) : (
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              Usuario eliminado
+            </p>
+          )}
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {createdAt}
           </p>
@@ -125,11 +135,13 @@ const ProjectCard = ({ project, onDelete }) => {
       
       {/* Título del proyecto */}
       <div className="px-4 pt-3 pb-2">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.title}</h3>
+        <Link href={`/projects/${project._id}`}>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white hover:text-[var(--mongodb-green)] transition-colors">{project.title}</h3>
+        </Link>
       </div>
       
       {/* Imagen del proyecto */}
-      <div className="relative aspect-video w-full">
+      <Link href={`/projects/${project._id}`} className="block relative aspect-video w-full">
         <Image
           src={project.image}
           alt={project.title}
@@ -138,14 +150,18 @@ const ProjectCard = ({ project, onDelete }) => {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="transition-transform duration-500 hover:scale-105"
         />
-      </div>
+      </Link>
       
       {/* Descripción y acciones */}
-      <div className="p-4">
-        <p className="text-gray-700 dark:text-gray-300 mb-4">{project.description}</p>
+      <div className={`p-4 ${compact ? 'flex-1 flex flex-col' : ''}`}>
+        {compact ? (
+          <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-2">{project.description}</p>
+        ) : (
+          <p className="text-gray-700 dark:text-gray-300 mb-4">{project.description}</p>
+        )}
         
         {/* Acciones del post */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+        <div className={`flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800 ${compact ? 'mt-auto' : ''}`}>
           <div className="flex items-center space-x-4">
             <button 
               onClick={handleLike}
@@ -154,7 +170,7 @@ const ProjectCard = ({ project, onDelete }) => {
             >
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                className="h-6 w-6 mr-1" 
+                className="h-5 w-5 mr-1" 
                 fill={liked ? 'currentColor' : 'none'} 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
@@ -166,30 +182,28 @@ const ProjectCard = ({ project, onDelete }) => {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
                 />
               </svg>
-              <span className="text-sm">{likesCount} {likesCount === 1 ? 'Me gusta' : 'Me gusta'}</span>
+              <span className="text-sm">{likesCount}</span>
             </button>
-            <button 
-              onClick={() => window.location.href = `/projects/${project._id}#comments`}
+            <Link 
+              href={`/projects/${project._id}#comments`}
               className="flex items-center text-gray-500 dark:text-gray-400 hover:text-[var(--mongodb-dark-green)] transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <span className="text-sm">{project.comments?.length || 0} {(project.comments?.length || 0) === 1 ? 'Comentario' : 'Comentarios'}</span>
-            </button>
+              <span className="text-sm">{project.comments?.length || 0}</span>
+            </Link>
           </div>
           
-          <a
-            href={project.link}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={`/projects/${project._id}`}
             className="flex items-center text-[var(--mongodb-dark-green)] hover:text-[var(--mongodb-green)] transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            <span className="text-sm font-medium">Ver</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-            <span className="text-sm font-medium">Ver Proyecto</span>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

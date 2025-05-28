@@ -88,6 +88,10 @@ export const authOptions = {
         if (userExists) {
           session.user.id = userExists._id.toString();
           session.user.role = userExists.role || 'user';
+          session.user.image = userExists.image;
+          session.user.bio = userExists.bio;
+          session.user.phone = userExists.phone;
+          session.user.github = userExists.github;
         }
         
         return session;
