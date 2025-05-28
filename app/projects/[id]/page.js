@@ -173,15 +173,31 @@ export default function ProjectDetailPage({ params }) {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Navegación y acciones */}
       <div className="flex justify-between items-center mb-6">
-        <button 
-          onClick={() => router.back()} 
-          className="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-[var(--mongodb-dark-green)] dark:hover:text-[var(--mongodb-dark-green)]"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Volver
-        </button>
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={() => router.back()} 
+            className="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-[var(--mongodb-dark-green)] dark:hover:text-[var(--mongodb-dark-green)]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Volver
+          </button>
+          
+          {project?.link && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-[var(--mongodb-dark-green)] text-white rounded-md hover:bg-[var(--mongodb-green)] transition-colors shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Ir a la página web del proyecto
+            </a>
+          )}
+        </div>
         
         {isOwner && (
           <div className="flex space-x-3">
