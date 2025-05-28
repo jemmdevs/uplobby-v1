@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ProjectCard from '@/components/ProjectCard';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,6 +11,9 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState('projects'); // 'projects' o 'users'
+  const [sortBy, setSortBy] = useState('date'); // 'date' o 'likes'
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -19,11 +22,96 @@ export default function ProjectsPage() {
     hasNextPage: false,
     hasPrevPage: false
   });
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchRef = useRef(null);
 
+  // Manejar clics fuera del área de búsqueda para cerrar los resultados
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  // Implementar debounce para la búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Esperar 300ms después de que el usuario deje de escribir
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  
+  // Realizar búsqueda en tiempo real cuando cambia la consulta
+  useEffect(() => {
+    const searchInRealTime = async () => {
+      if (debouncedSearchQuery.length < 2) {
+        setSearchResults([]);
+        setShowSearchResults(false);
+        return;
+      }
+      
+      setSearchLoading(true);
+      
+      try {
+        if (searchType === 'users') {
+          // Búsqueda de usuarios
+          const response = await fetch(`/api/search/users?query=${encodeURIComponent(debouncedSearchQuery)}`);
+          if (response.ok) {
+            const data = await response.json();
+            setSearchResults(data.users);
+            setShowSearchResults(true);
+          }
+        } else {
+          // Búsqueda de proyectos
+          const response = await fetch(`/api/search/projects?query=${encodeURIComponent(debouncedSearchQuery)}`);
+          if (response.ok) {
+            const data = await response.json();
+            setSearchResults(data.projects);
+            setShowSearchResults(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error en búsqueda en tiempo real:', error);
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+    
+    if (searchType === 'users') {
+      // Solo realizar búsqueda en tiempo real para usuarios
+      searchInRealTime();
+    } else {
+      // Para proyectos, solo mostrar resultados si el usuario hace clic en buscar
+      setShowSearchResults(false);
+    }
+  }, [debouncedSearchQuery, searchType]);
+  
   const fetchProjects = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/projects?page=${page}&limit=${pagination.limit}`);
+      
+      // Construir URL con parámetros de búsqueda y ordenación
+      let url = `/api/projects?page=${page}&limit=${pagination.limit}`;
+      
+      if (debouncedSearchQuery && searchType === 'projects') {
+        url += `&search=${encodeURIComponent(debouncedSearchQuery)}`;
+      }
+      
+      if (sortBy) {
+        url += `&sortBy=${sortBy}`;
+      }
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Error al cargar los proyectos');
@@ -47,6 +135,49 @@ export default function ProjectsPage() {
     }
   };
   
+  // Función para manejar cambios en la ordenación
+  const handleSortChange = (newSortBy) => {
+    setSortBy(newSortBy);
+  };
+  
+  // Función para manejar cambios en la búsqueda
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  // Función para cambiar el tipo de búsqueda
+  const handleSearchTypeChange = (type) => {
+    setSearchType(type);
+    setSearchResults([]);
+    setShowSearchResults(false);
+  };
+  
+  // Función para manejar clic en un resultado de búsqueda de usuario
+  const handleUserClick = (userId) => {
+    window.location.href = `/user/${userId}`;
+  };
+  
+  // Función para manejar clic en un resultado de búsqueda de proyecto
+  const handleProjectClick = (projectId) => {
+    window.location.href = `/projects/${projectId}`;
+  };
+  
+  // Función para manejar la búsqueda al presionar Enter
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchType === 'projects') {
+      // Para proyectos, realizar búsqueda y actualizar la lista principal
+      fetchProjects(1);
+      setShowSearchResults(false);
+    }
+  };
+  
+  // Efecto para cargar proyectos cuando cambian los parámetros de búsqueda o ordenación
+  useEffect(() => {
+    fetchProjects(1); // Volver a la primera página al cambiar búsqueda u ordenación
+  }, [debouncedSearchQuery, sortBy]);
+  
+  // Cargar proyectos al inicio
   useEffect(() => {
     fetchProjects(1);
   }, []);
@@ -94,6 +225,161 @@ export default function ProjectsPage() {
               Nuevo Proyecto
             </Link>
           )}
+        </div>
+        
+        {/* Barra de búsqueda */}
+        <div className="bg-white dark:bg-[var(--mongodb-navy)] rounded-xl shadow-md p-4 mb-6 border border-gray-100 dark:border-gray-800">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row md:items-center gap-4">
+            {/* Selector de tipo de búsqueda */}
+            <div className="flex rounded-md shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleSearchTypeChange('projects')}
+                className={`px-3 py-2 rounded-l-md border ${searchType === 'projects' ? 'bg-[var(--mongodb-dark-green)] text-white border-[var(--mongodb-dark-green)]' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+              >
+                Proyectos
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSearchTypeChange('users')}
+                className={`px-3 py-2 rounded-r-md border ${searchType === 'users' ? 'bg-[var(--mongodb-dark-green)] text-white border-[var(--mongodb-dark-green)]' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+              >
+                Usuarios
+              </button>
+            </div>
+            
+            {/* Barra de búsqueda */}
+            <div className="relative flex-1" ref={searchRef}>
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder={searchType === 'users' ? "Buscar usuarios por nombre..." : "Buscar proyectos..."}
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-[var(--mongodb-green)] focus:border-[var(--mongodb-green)] text-gray-900 dark:text-white text-sm transition duration-150 ease-in-out"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+              
+              {/* Resultados de búsqueda en tiempo real */}
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+                  {searchLoading ? (
+                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                      <div className="flex justify-center items-center space-x-2">
+                        <svg className="animate-spin h-5 w-5 text-[var(--mongodb-green)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Buscando...</span>
+                      </div>
+                    </div>
+                  ) : searchType === 'users' ? (
+                    // Resultados de búsqueda de usuarios
+                    <ul className="py-1">
+                      {searchResults.map((user) => (
+                        <li key={user._id} className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                          <div 
+                            className="px-4 py-2 flex items-center space-x-3"
+                            onClick={() => handleUserClick(user._id)}
+                          >
+                            <div className="flex-shrink-0">
+                              <img 
+                                src={user.image || '/default-avatar.png'} 
+                                alt={user.name} 
+                                className="h-8 w-8 rounded-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {user.name}
+                              </p>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    // Resultados de búsqueda de proyectos
+                    <ul className="py-1">
+                      {searchResults.map((project) => (
+                        <li key={project._id} className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                          <div 
+                            className="px-4 py-2 flex items-center space-x-3"
+                            onClick={() => handleProjectClick(project._id)}
+                          >
+                            <div className="flex-shrink-0">
+                              <img 
+                                src={project.image || '/placeholder.png'} 
+                                alt={project.title} 
+                                className="h-10 w-10 rounded-md object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {project.title}
+                              </p>
+                              {project.creator && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                  por {project.creator.name}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            {/* Botón de búsqueda para proyectos */}
+            {searchType === 'projects' && (
+              <button
+                type="submit"
+                className="px-4 py-2 bg-[var(--mongodb-dark-green)] text-white rounded-md hover:bg-[var(--mongodb-green)] transition-colors shadow-sm"
+              >
+                Buscar
+              </button>
+            )}
+          </form>
+        </div>
+        
+        {/* Controles de ordenación */}
+        <div className="flex justify-end mb-4">
+          <div className="bg-white dark:bg-[var(--mongodb-navy)] rounded-xl shadow-md p-2 border border-gray-100 dark:border-gray-800 inline-flex items-center">
+            <span className="text-sm text-gray-700 dark:text-gray-300 mr-2 font-medium">Ordenar por:</span>
+            <div className="flex rounded-md shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleSortChange('date')}
+                className={`px-3 py-1.5 rounded-l-md border text-sm ${sortBy === 'date' ? 'bg-[var(--mongodb-dark-green)] text-white border-[var(--mongodb-dark-green)]' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+              >
+                Recientes
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSortChange('likes')}
+                className={`px-3 py-1.5 rounded-r-md border text-sm ${sortBy === 'likes' ? 'bg-[var(--mongodb-dark-green)] text-white border-[var(--mongodb-dark-green)]' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+              >
+                Populares
+              </button>
+            </div>
+          </div>
         </div>
         
         {session && (
@@ -190,17 +476,39 @@ export default function ProjectsPage() {
           <div className="bg-white dark:bg-[var(--mongodb-navy)] shadow-md rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 p-8 text-center">
             <div className="flex justify-center mb-6">
               <div className="bg-gray-100 dark:bg-gray-800 rounded-full p-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+                {searchQuery ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                )}
               </div>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">No hay proyectos todavía</h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              {searchQuery ? "No se encontraron resultados" : "No hay proyectos todavía"}
+            </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-              {session ? 
-                "¡Parece que nadie ha compartido proyectos todavía! Sé el primero en mostrar tu trabajo a la comunidad." :
-                "¡Únete a nuestra comunidad para descubrir proyectos increíbles o compartir los tuyos!"}
+              {searchQuery ? 
+                `No se encontraron proyectos o usuarios que coincidan con "${searchQuery}". Intenta con otra búsqueda.` :
+                (session ? 
+                  "¡Parece que nadie ha compartido proyectos todavía! Sé el primero en mostrar tu trabajo a la comunidad." :
+                  "¡Únete a nuestra comunidad para descubrir proyectos increíbles o compartir los tuyos!")
+              }
             </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="inline-flex items-center justify-center text-white bg-[var(--mongodb-dark-green)] hover:bg-[var(--mongodb-green)] px-6 py-3 rounded-full text-base font-medium transition-colors shadow-sm mb-4"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Limpiar búsqueda
+              </button>
+            )}
             {session ? (
               <Link 
                 href="/projects/new" 
