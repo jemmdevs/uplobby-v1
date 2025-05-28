@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDB } from '@/lib/mongodb';
 import User from '@/models/User';
+import Project from '@/models/Project';
 import { withAdmin } from '@/middleware/withAdmin';
 
 // GET - Obtener todos los usuarios
@@ -75,10 +76,34 @@ async function deleteUser(request) {
       return NextResponse.json({ error: 'No se puede eliminar la cuenta de administrador principal' }, { status: 403 });
     }
     
-    // Eliminar el usuario
+    // 1. Eliminar todos los proyectos creados por el usuario
+    const deletedProjects = await Project.deleteMany({ creator: userId });
+    
+    // 2. Eliminar todos los comentarios hechos por el usuario en otros proyectos
+    // Buscar proyectos que contienen comentarios del usuario
+    const projectsWithUserComments = await Project.find({ 'comments.author': userId });
+    
+    // Para cada proyecto, filtrar los comentarios del usuario
+    for (const project of projectsWithUserComments) {
+      project.comments = project.comments.filter(comment => 
+        comment.author.toString() !== userId.toString()
+      );
+      await project.save();
+    }
+    
+    // 3. Eliminar los likes del usuario en proyectos
+    await Project.updateMany(
+      { likes: userId },
+      { $pull: { likes: userId } }
+    );
+    
+    // 4. Finalmente, eliminar el usuario
     await User.findByIdAndDelete(userId);
     
-    return NextResponse.json({ message: 'Usuario eliminado correctamente' }, { status: 200 });
+    return NextResponse.json({ 
+      message: 'Usuario y todo su contenido eliminado correctamente',
+      deletedProjects: deletedProjects.deletedCount
+    }, { status: 200 });
   } catch (error) {
     console.error('Error al eliminar usuario:', error);
     return NextResponse.json({ error: 'Error al eliminar usuario' }, { status: 500 });
