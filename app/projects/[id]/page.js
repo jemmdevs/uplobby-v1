@@ -219,24 +219,28 @@ export default function ProjectDetailPage({ params }) {
         {/* Cabecera con información del creador */}
         <div className="p-6 flex items-center border-b border-gray-100 dark:border-gray-800">
           <div className="flex-shrink-0">
-            {project.creator.image ? (
-              <Image
-                className="h-12 w-12 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
-                src={project.creator.image}
-                alt={project.creator.name}
-                width={48}
-                height={48}
-              />
-            ) : (
-              <div className="h-12 w-12 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white text-lg font-medium shadow-sm">
-                {project.creator.name?.charAt(0) || "U"}
-              </div>
-            )}
+            <Link href={`/profile/${project.creator._id}`}>
+              {project.creator.image ? (
+                <Image
+                  className="h-12 w-12 rounded-full border-2 border-white dark:border-gray-800 shadow-sm hover:opacity-90 transition-opacity cursor-pointer"
+                  src={project.creator.image}
+                  alt={project.creator.name}
+                  width={48}
+                  height={48}
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-[var(--mongodb-dark-green)] flex items-center justify-center text-white text-lg font-medium shadow-sm hover:opacity-90 transition-opacity cursor-pointer">
+                  {project.creator.name?.charAt(0) || "U"}
+                </div>
+              )}
+            </Link>
           </div>
           <div className="ml-4 flex-1">
-            <p className="text-base font-medium text-gray-900 dark:text-white">
-              {project.creator.name}
-            </p>
+            <Link href={`/profile/${project.creator._id}`} className="hover:text-[var(--mongodb-dark-green)] transition-colors">
+              <p className="text-base font-medium text-gray-900 dark:text-white">
+                {project.creator.name}
+              </p>
+            </Link>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Publicado el {createdAt}
             </p>
