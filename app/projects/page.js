@@ -155,6 +155,7 @@ export default function ProjectsPage() {
   // Función para manejar cambios en la ordenación
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);
+    fetchProjects(1); // Recargar proyectos con el nuevo orden
   };
   
   // Función para manejar cambios en la búsqueda
@@ -171,7 +172,7 @@ export default function ProjectsPage() {
   
   // Función para manejar clic en un resultado de búsqueda de usuario
   const handleUserClick = (userId) => {
-    window.location.href = `/user/${userId}`;
+    window.location.href = `/profile/${userId}`;
   };
   
   // Función para manejar clic en un resultado de búsqueda de proyecto
