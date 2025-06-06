@@ -337,7 +337,7 @@ export default function AdminProjects() {
                 <div className="border-t border-gray-200 dark:border-gray-800 px-5 py-3 flex justify-between items-center">
                   <div className="text-sm">
                     <Link
-                      href={`/project/${project._id}`}
+                      href={`/projects/${project._id}`}
                       className="font-medium text-[var(--mongodb-dark-green)] hover:text-[var(--mongodb-green)] transition-colors"
                     >
                       Ver proyecto
