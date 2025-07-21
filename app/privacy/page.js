@@ -115,7 +115,7 @@ export default function PrivacyPage() {
           <p className="mb-4">
             Podemos actualizar esta política de privacidad periódicamente. Le notificaremos 
             cualquier cambio significativo publicando la nueva política en esta página y 
-            actualizando la fecha de "última actualización".
+            actualizando la fecha de &quot;última actualización&quot;.
           </p>
         </section>
 

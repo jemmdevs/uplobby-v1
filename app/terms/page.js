@@ -65,7 +65,7 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">6. Limitación de Responsabilidad</h2>
           <p className="mb-4">
-            UpLobby se proporciona "tal como está" sin garantías de ningún tipo. 
+            UpLobby se proporciona &quot;tal como está&quot; sin garantías de ningún tipo. 
             En ningún caso UpLobby será responsable de daños directos, indirectos, 
             incidentales, especiales o consecuentes.
           </p>
